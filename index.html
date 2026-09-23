@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="es-AR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>¿Cuánto duele? — Cuánto de tu tiempo cuesta lo que querés comprar</title>
+<meta name="description" content="Convertí cualquier precio en horas, días y meses de tu trabajo. Gratis, sin registrarte y tus datos quedan en tu dispositivo.">
+<meta property="og:title" content="¿Cuánto duele?">
+<meta property="og:description" content="Mirá cuántas horas de trabajo te cuesta lo que querés comprar.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,400..900&display=swap" rel="stylesheet">
+<style>
+  /* =========  CONFIGURACIÓN RÁPIDA  =========
+     Cuando subas la página a internet, poné tu dirección en SITE_URL (más abajo, en el script)
+     para que aparezca en las imágenes compartidas. */
+
+  :root {
+    --paper: #EEF2F7;
+    --card: #FFFFFF;
+    --ink: #16235C;
+    --ink-soft: #4E5A8C;
+    --line: #CBD3E4;
+    --stamp: #D8432E;
+    --empty: #DDE4F0;
+    --focus: #2F6BFF;
+    box-sizing: border-box;
+    padding-top: env(safe-area-inset-top, 0px);
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #0D1330;
+      --card: #161F47;
+      --ink: #E9EDFA;
+      --ink-soft: #A7B1D6;
+      --line: #2C3868;
+      --stamp: #FF6C57;
+      --empty: #253166;
+      --focus: #7FA2FF;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0D1330;
+    --card: #161F47;
+    --ink: #E9EDFA;
+    --ink-soft: #A7B1D6;
+    --line: #2C3868;
+    --stamp: #FF6C57;
+    --empty: #253166;
+    --focus: #7FA2FF;
+    color-scheme: dark;
+  }
+  html { scroll-padding-top: env(safe-area-inset-top, 0px); }
+  *, *::before, *::after { box-sizing: inherit; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Archivo", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    font-size: 1.0625rem;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  img { max-width: 100%; }
+  .wrap { max-width: 1040px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; }
+
+  /* ---------- Encabezado ---------- */
+  header { padding: 1.5rem 0 2rem; max-width: 40rem; }
+  h1 {
+    font-stretch: 68%;
+    font-weight: 900;
+    font-size: clamp(3.2rem, 11vw, 6.5rem);
+    line-height: 0.88;
+    letter-spacing: -0.01em;
+    margin: 0 0 1rem;
+  }
+  .lead { font-size: 1.2rem; color: var(--ink-soft); margin: 0; max-width: 32rem; }
+
+  /* ---------- Layout ---------- */
+  .grid { display: grid; gap: 1.5rem; }
+  @media (min-width: 880px) {
+    .grid { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); align-items: start; }
+    .col-result { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 1rem); }
+  }
+
+  .panel {
+    background: var(--card);
+    border: 1.5px solid var(--line);
+    border-radius: 14px;
+    padding: 1.35rem;
+  }
+  .panel + .panel { margin-top: 1.5rem; }
+  h2 {
+    font-stretch: 85%;
+    font-weight: 800;
+    font-size: 1.45rem;
+    line-height: 1.1;
+    margin: 0 0 1rem;
+  }
+  label { display: block; font-weight: 600; font-size: 0.95rem; margin-bottom: 0.35rem; }
+  .field { margin-bottom: 1rem; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  input, select {
+    width: 100%;
+    font: inherit;
+    font-size: 1.1rem;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1.5px solid var(--line);
+    border-radius: 10px;
+    padding: 0.7rem 0.8rem;
+    min-height: 48px;
+  }
+  .money { position: relative; }
+  .money span {
+    position: absolute; left: 0.85rem; top: 50%; transform: translateY(-50%);
+    font-weight: 700; color: var(--ink-soft); pointer-events: none;
+  }
+  .money input { padding-left: 1.8rem; font-weight: 700; }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  input:focus, select:focus { border-color: var(--focus); outline: none; box-shadow: 0 0 0 3px color-mix(in srgb, var(--focus) 30%, transparent); }
+  .hint { font-size: 0.88rem; color: var(--ink-soft); margin: 0.35rem 0 0; }
+
+  button {
+    font: inherit; cursor: pointer; border-radius: 10px; min-height: 48px;
+    padding: 0.7rem 1.1rem; font-weight: 700; border: 1.5px solid transparent;
+  }
+  .btn-main { background: var(--ink); color: var(--card); width: 100%; font-size: 1.1rem; }
+  .btn-main:hover { filter: brightness(1.15); }
+  .btn-ghost { background: transparent; color: var(--ink); border-color: var(--line); }
+  .btn-ghost:hover { border-color: var(--ink); }
+  .btn-link { background: none; border: none; color: var(--ink-soft); text-decoration: underline; padding: 0.3rem; min-height: auto; font-weight: 600; }
+
+  .summary {
+    display: flex; justify-content: space-between; align-items: center; gap: 1rem; flex-wrap: wrap;
+  }
+  .summary strong { font-stretch: 80%; font-size: 1.6rem; font-weight: 800; display: block; line-height: 1.1; }
+  .summary small { color: var(--ink-soft); font-size: 0.92rem; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 0.45rem; margin: -0.25rem 0 1.1rem; }
+  .chip {
+    min-height: 36px; padding: 0.35rem 0.8rem; border-radius: 999px; font-weight: 600; font-size: 0.92rem;
+    background: var(--paper); color: var(--ink); border: 1.5px solid var(--line);
+  }
+  .chip:hover { border-color: var(--ink); }
+  .error { color: var(--stamp); font-weight: 600; font-size: 0.95rem; margin: 0 0 0.8rem; min-height: 0; }
+
+  /* ---------- Resultado: tarjeta de fichaje ---------- */
+  .card-result {
+    background: var(--card);
+    border: 1.5px solid var(--line);
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .card-top {
+    padding: 1.35rem 1.35rem 1.1rem;
+    border-bottom: 2px dashed var(--line);
+    position: relative;
+  }
+  .card-top::before, .card-top::after {
+    content: ""; position: absolute; bottom: -12px; width: 22px; height: 22px; border-radius: 50%;
+    background: var(--paper); border: 1.5px solid var(--line);
+  }
+  .card-top::before { left: -12px; }
+  .card-top::after { right: -12px; }
+  .product-name { font-weight: 700; font-size: 1.1rem; margin: 0; overflow-wrap: anywhere; }
+  .product-price { color: var(--ink-soft); margin: 0; }
+  .big {
+    display: flex; align-items: baseline; gap: 0.6rem; flex-wrap: wrap; margin: 0.9rem 0 0.2rem;
+  }
+  .big-num {
+    font-stretch: 62%;
+    font-weight: 900;
+    font-size: clamp(5rem, 20vw, 8.5rem);
+    line-height: 0.85;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+  .big-unit { font-stretch: 80%; font-weight: 800; font-size: 1.6rem; line-height: 1.05; max-width: 9ch; }
+  .stamp {
+    display: inline-block; margin-top: 0.9rem;
+    border: 2.5px solid var(--stamp); color: var(--stamp);
+    font-stretch: 80%; font-weight: 800; font-size: 1.05rem;
+    padding: 0.25rem 0.7rem; border-radius: 6px; transform: rotate(-2deg);
+  }
+  .card-body { padding: 1.4rem 1.35rem 1.35rem; }
+  .breakdown { margin: 0 0 1rem; font-size: 1.05rem; }
+  .breakdown b { font-weight: 800; }
+  .facts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0.5rem; margin: 0 0 1.25rem; }
+  .fact { border-left: 3px solid var(--ink); padding: 0.1rem 0 0.1rem 0.6rem; }
+  .fact b { display: block; font-stretch: 75%; font-size: 1.45rem; font-weight: 800; line-height: 1.1; }
+  .fact span { font-size: 0.82rem; color: var(--ink-soft); line-height: 1.2; display: block; }
+
+  .days-label { font-size: 0.9rem; color: var(--ink-soft); margin: 0 0 0.5rem; }
+  .days { display: grid; grid-template-columns: repeat(auto-fill, minmax(18px, 1fr)); gap: 4px; margin-bottom: 0.5rem; }
+  .day { aspect-ratio: 1; border-radius: 3px; background: var(--empty); overflow: hidden; position: relative; }
+  .day i { position: absolute; inset: 0 auto 0 0; background: var(--ink); width: 0; }
+  .days.animate .day i { transition: width 0.35s ease-out; }
+  .overflow-note { font-size: 0.88rem; color: var(--ink-soft); margin: 0 0 1rem; }
+
+  .save-box { margin-top: 1.4rem; padding-top: 1.3rem; border-top: 2px dashed var(--line); }
+  .save-box h3 { font-stretch: 85%; font-weight: 800; font-size: 1.3rem; margin: 0 0 0.8rem; line-height: 1.15; }
+  .save-result { margin-top: 1rem; }
+  .save-result:empty { display: none; }
+  .save-main { font-size: 1.15rem; margin: 0 0 0.35rem; }
+  .save-main b { font-stretch: 75%; font-weight: 900; font-size: 2.3rem; line-height: 1; display: block; }
+  .save-sub { color: var(--ink-soft); margin: 0 0 0.3rem; font-size: 0.97rem; }
+
+  .empty-state {
+    border: 2px dashed var(--line); border-radius: 14px; padding: 2.2rem 1.5rem; text-align: left; color: var(--ink-soft);
+  }
+  .empty-state p { margin: 0; max-width: 26rem; }
+  .empty-state b { color: var(--ink); font-stretch: 80%; font-size: 1.5rem; display: block; margin-bottom: 0.4rem; line-height: 1.15; }
+
+  /* ---------- Historial ---------- */
+  .history { list-style: none; padding: 0; margin: 0; }
+  .history li {
+    display: grid; grid-template-columns: 1fr auto auto; gap: 0.6rem; align-items: center;
+    padding: 0.65rem 0; border-bottom: 1px solid var(--line);
+  }
+  .history li:last-child { border-bottom: none; }
+  .h-name { font-weight: 600; overflow-wrap: anywhere; background: none; border: none; color: var(--ink); text-align: left; padding: 0; min-height: 44px; }
+  .h-name small { display: block; color: var(--ink-soft); font-weight: 400; }
+  .h-time { font-stretch: 80%; font-weight: 800; white-space: nowrap; }
+  .h-del { background: none; border: none; color: var(--ink-soft); min-height: 44px; min-width: 44px; padding: 0; font-size: 1.3rem; }
+  .h-del:hover { color: var(--stamp); }
+
+
+  .wish-btn { margin-top: 1.4rem; }
+  .toast { font-size: 0.92rem; font-weight: 600; min-height: 1.4em; margin: 0.6rem 0 0; color: var(--ink-soft); }
+
+  .wish-panel { margin-top: 1.5rem; }
+  .wish-hint { margin: -0.5rem 0 1rem; }
+  .wishes { list-style: none; padding: 0; margin: 0; display: grid; gap: 1rem; }
+  @media (min-width: 880px) { .wishes { grid-template-columns: 1fr 1fr; } }
+  .wish { border: 1.5px solid var(--line); border-radius: 12px; padding: 1rem 1.1rem; background: var(--paper); }
+  .wish-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.5rem; }
+  .wish-head strong { display: block; font-weight: 700; font-size: 1.1rem; overflow-wrap: anywhere; }
+  .wish-head small { color: var(--ink-soft); }
+  .bar { height: 14px; border-radius: 999px; background: var(--empty); overflow: hidden; margin: 0.8rem 0 0.5rem; }
+  .bar i { display: block; height: 100%; background: var(--ink); border-radius: 999px; transition: width 0.4s ease-out; }
+  @media (prefers-reduced-motion: reduce) { .bar i { transition: none; } }
+  .wish-status { margin: 0 0 0.25rem; font-size: 0.97rem; }
+  .wish-status b { font-weight: 800; }
+  .wish-eta { margin: 0 0 0.8rem; font-size: 0.9rem; color: var(--ink-soft); }
+  .wish-add { display: grid; grid-template-columns: 1fr auto auto; gap: 0.5rem; }
+  .wish-add input { background: var(--card); }
+  .wish-add button { padding: 0.6rem 0.9rem; }
+  .wish-add .btn-main { width: auto; font-size: 1rem; }
+  .cuotas-hint { margin: -0.4rem 0 0.9rem; }
+  .no-interest { margin: -0.5rem 0 0.8rem; }
+  .verdict { display: inline-block; font-stretch: 80%; font-weight: 800; font-size: 1.25rem; border: 2.5px solid var(--ink); padding: 0.2rem 0.7rem; border-radius: 6px; margin: 0.2rem 0 0.6rem; }
+  .verdict.warn { border-color: var(--stamp); color: var(--stamp); }
+  .price-edit { display: grid; grid-template-columns: 1fr auto auto; gap: 0.4rem; margin-top: 0.4rem; }
+  .price-edit input { background: var(--card); min-height: 42px; padding-top: 0.45rem; padding-bottom: 0.45rem; }
+  .price-edit button { min-height: 42px; padding: 0.4rem 0.8rem; }
+  .price-edit .btn-main { width: auto; font-size: 1rem; }
+  .edit-link { font-size: 0.88rem; padding: 0.2rem 0; margin-left: 0.5rem; }
+  .price-change { display: block; font-size: 0.85rem; color: var(--ink-soft); }
+  .wish-msg { margin: 0.5rem 0 0; font-size: 0.9rem; font-weight: 600; color: var(--ink-soft); min-height: 1.3em; }
+  .wish.done .bar i { background: var(--stamp); }
+  .done-stamp { display: inline-block; margin: 0.2rem 0 0.8rem; border: 2.5px solid var(--stamp); color: var(--stamp); font-stretch: 80%; font-weight: 800; padding: 0.15rem 0.6rem; border-radius: 6px; transform: rotate(-2deg); }
+  @media (max-width: 420px) { .wish-add { grid-template-columns: 1fr 1fr; } .wish-add .money { grid-column: 1 / -1; } }
+
+  .recommend { display: flex; align-items: center; gap: 0.9rem; flex-wrap: wrap; margin-bottom: 1.2rem; }
+  .recommend span { font-size: 0.9rem; }
+
+  footer { margin-top: 3rem; color: var(--ink-soft); font-size: 0.9rem; max-width: 40rem; }
+  footer p { margin: 0 0 0.4rem; }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 420px) {
+    .facts { grid-template-columns: 1fr 1fr; }
+    .row { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .days.animate .day i { transition: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>¿Cuánto<br>duele?</h1>
+    <p class="lead">Poné tu sueldo y cualquier precio. Te decimos cuántas horas, días o meses de tu trabajo te cuesta, y cuánto tardás en juntarlo.</p>
+  </header>
+
+  <main class="grid">
+    <div class="col-form">
+      <!-- Sueldo -->
+      <section class="panel" id="salaryPanel" aria-labelledby="salaryTitle">
+        <h2 id="salaryTitle">Tu sueldo</h2>
+
+        <div id="salarySummary" class="summary hidden">
+          <div>
+            <strong id="hourlyText"></strong>
+            <small id="salaryDetail"></small>
+          </div>
+          <button class="btn-ghost" id="editSalary" type="button">Editar sueldo</button>
+        </div>
+
+        <div id="salaryForm">
+          <div class="field">
+            <label for="income">¿Cuánto cobrás? (en mano)</label>
+            <div class="money"><span>$</span><input id="income" type="text" inputmode="decimal" autocomplete="off" placeholder="0"></div>
+          </div>
+          <div class="field">
+            <label for="period">¿Cada cuánto?</label>
+            <select id="period">
+              <option value="mes">Por mes</option>
+              <option value="quincena">Por quincena</option>
+              <option value="semana">Por semana</option>
+              <option value="hora">Por hora</option>
+            </select>
+          </div>
+          <div class="row">
+            <div class="field">
+              <label for="daysWeek">Días que trabajás por semana</label>
+              <input id="daysWeek" type="number" min="1" max="7" step="1" value="5" inputmode="numeric">
+            </div>
+            <div class="field">
+              <label for="hoursDay">Horas por día</label>
+              <input id="hoursDay" type="number" min="1" max="24" step="0.5" value="8" inputmode="decimal">
+            </div>
+          </div>
+          <p class="error" id="salaryError" role="alert"></p>
+          <button class="btn-main" id="saveSalary" type="button">Guardar sueldo</button>
+          <p class="hint">Se guarda solo en tu dispositivo. Nadie más lo ve.</p>
+        </div>
+      </section>
+
+      <!-- Producto -->
+      <section class="panel" aria-labelledby="productTitle">
+        <h2 id="productTitle">¿Qué querés comprar?</h2>
+        <div class="field">
+          <label for="pName">Qué es</label>
+          <input id="pName" type="text" maxlength="60" placeholder="Ej: unas zapatillas" autocomplete="off">
+        </div>
+        <div class="chips" aria-label="Ideas rápidas">
+          <button class="chip" type="button" data-name="Un celular nuevo">Celular</button>
+          <button class="chip" type="button" data-name="Una PlayStation">Consola</button>
+          <button class="chip" type="button" data-name="El alquiler">Alquiler</button>
+          <button class="chip" type="button" data-name="Una entrada a un recital">Recital</button>
+          <button class="chip" type="button" data-name="Un café">Un café</button>
+          <button class="chip" type="button" data-name="Unas vacaciones">Vacaciones</button>
+          <button class="chip" type="button" data-name="Un auto 0 km">Auto 0 km</button>
+        </div>
+        <div class="field">
+          <label for="pPrice">Precio</label>
+          <div class="money"><span>$</span><input id="pPrice" type="text" inputmode="decimal" autocomplete="off" placeholder="0"></div>
+        </div>
+        <p class="error" id="productError" role="alert"></p>
+        <button class="btn-main" id="calc" type="button">Calcular</button>
+      </section>
+
+      <!-- Historial -->
+      <section class="panel hidden" id="historyPanel" aria-labelledby="historyTitle">
+        <h2 id="historyTitle">Lo que ya calculaste</h2>
+        <ul class="history" id="historyList"></ul>
+        <button class="btn-link" id="clearHistory" type="button">Borrar historial</button>
+      </section>
+    </div>
+
+    <div class="col-result" id="resultCol">
+      <div class="empty-state" id="emptyState">
+        <p><b>Acá vas a ver cuánto te duele.</b>Cargá tu sueldo, escribí qué querés comprar y cuánto sale.</p>
+      </div>
+
+      <article class="card-result hidden" id="result" aria-live="polite">
+        <div class="card-top">
+          <p class="product-name" id="rName"></p>
+          <p class="product-price" id="rPrice"></p>
+          <div class="big">
+            <span class="big-num" id="rBig"></span>
+            <span class="big-unit" id="rUnit"></span>
+          </div>
+          <span class="stamp" id="rQuip"></span>
+        </div>
+        <div class="card-body">
+          <p class="breakdown" id="rBreakdown"></p>
+          <div class="facts">
+            <div class="fact"><b id="fPercent"></b><span>de tu sueldo mensual</span></div>
+            <div class="fact"><b id="fHours"></b><span>horas de trabajo en total</span></div>
+            <div class="fact"><b id="fWeeks"></b><span>semanas laborales</span></div>
+          </div>
+          <p class="days-label" id="gridLabel"></p>
+          <div class="days" id="daysGrid" aria-hidden="true"></div>
+          <p class="overflow-note hidden" id="gridNote"></p>
+
+          <div class="save-box">
+            <h3>¿Y si ahorrás todos los días?</h3>
+            <label for="dailySave">Cuánto podés guardar por día</label>
+            <div class="money"><span>$</span><input id="dailySave" type="text" inputmode="decimal" autocomplete="off" placeholder="0"></div>
+            <div class="save-result" id="saveResult" aria-live="polite"></div>
+          </div>
+          <div class="save-box">
+            <h3>¿Cuotas o contado?</h3>
+            <p class="hint cuotas-hint">Si te lo ofrecen en cuotas, cargalas acá. Tomamos el precio de arriba como precio de contado.</p>
+            <div class="row">
+              <div class="field">
+                <label for="cCount">Cantidad de cuotas</label>
+                <input id="cCount" type="number" min="2" max="60" step="1" inputmode="numeric" placeholder="Ej: 6">
+              </div>
+              <div class="field">
+                <label for="cValue">Valor de cada cuota</label>
+                <div class="money"><span>$</span><input id="cValue" type="text" inputmode="decimal" autocomplete="off" placeholder="0"></div>
+              </div>
+            </div>
+            <button class="btn-link no-interest" id="cNoInterest" type="button">Son sin interés</button>
+            <div class="field">
+              <label for="cInfl">Inflación mensual estimada (%)</label>
+              <input id="cInfl" type="text" inputmode="decimal" autocomplete="off" placeholder="Ej: 2,5">
+              <p class="hint">Podés usar el último dato mensual del INDEC.</p>
+            </div>
+            <div class="save-result" id="cResult" aria-live="polite"></div>
+          </div>
+          <button class="btn-main wish-btn" id="addWish" type="button">Lo quiero: agregar a mi lista</button>
+          <p class="toast" id="toast" role="status"></p>
+        </div>
+      </article>
+    </div>
+  </main>
+
+  <section class="panel wish-panel hidden" id="wishPanel" aria-labelledby="wishTitle">
+    <h2 id="wishTitle">Mi lista de deseos</h2>
+    <p class="hint wish-hint">Cada vez que guardes plata para algo, sumala acá y mirá cuánto te falta.</p>
+    <ul class="wishes" id="wishList"></ul>
+  </section>
+
+  <footer>
+    <div class="recommend">
+      <button class="btn-ghost" id="recommend" type="button">Recomendar la app</button>
+      <span>Se comparte solo el link, nunca tus datos.</span>
+    </div>
+    <p class="toast" id="footToast" role="status"></p>
+    <p>Tus datos no salen de tu dispositivo: no hay registro, ni cuentas, ni servidores.</p>
+    <p>Los cálculos son aproximados y usan 4,33 semanas por mes.</p>
+  </footer>
+</div>
+
+
+<script>
+(function () {
+  // ======== CONFIGURACIÓN ========
+    const APP_NAME = "¿Cuánto duele?";
+  const SITE_URL = ""; // Cuando la subas a internet, poné acá tu dirección. Ej: "cuantoduele.netlify.app"
+  const WEEKS_PER_MONTH = 52 / 12;
+  const STORE_KEY = "cuantoduele:v1";
+
+  // ======== Utilidades ========
+  const $ = (id) => document.getElementById(id);
+  const nf = (n, d = 0) => n.toLocaleString("es-AR", { maximumFractionDigits: d, minimumFractionDigits: 0 });
+  const money = (n) => "$" + nf(n, n < 100 ? 2 : 0);
+
+  function parseNum(str) {
+    if (!str) return NaN;
+    const clean = String(str).replace(/\./g, "").replace(",", ".").replace(/[^\d.]/g, "");
+    return clean ? Number(clean) : NaN;
+  }
+  function formatMoneyInput(el) {
+    let v = el.value.replace(/[^\d,]/g, "");
+    const parts = v.split(",");
+    let int = parts[0].replace(/^0+(?=\d)/, "");
+    int = int.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    el.value = parts.length > 1 ? int + "," + parts.slice(1).join("").slice(0, 2) : int;
+  }
+  function plural(n, one, many) { return Math.abs(n - 1) < 1e-9 ? one : many; }
+
+  function load() {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch (e) { return {}; }
+  }
+  function save(data) {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(data)); } catch (e) { /* sin almacenamiento: seguimos igual */ }
+  }
+
+  let state = load();
+  state.history = Array.isArray(state.history) ? state.history : [];
+  state.wishlist = Array.isArray(state.wishlist) ? state.wishlist : [];
+  let last = null;
+
+  // ======== Sueldo ========
+  function salaryMath(s) {
+    const hpw = s.daysWeek * s.hoursDay;
+    let hourly;
+    if (s.period === "mes") hourly = s.income / (hpw * WEEKS_PER_MONTH);
+    else if (s.period === "quincena") hourly = s.income / (hpw * WEEKS_PER_MONTH / 2);
+    else if (s.period === "semana") hourly = s.income / hpw;
+    else hourly = s.income;
+    const monthly = hourly * hpw * WEEKS_PER_MONTH;
+    return { hourly, monthly, hpw, hpd: s.hoursDay };
+  }
+
+  function showSalarySummary() {
+    const m = salaryMath(state.salary);
+    $("hourlyText").textContent = "Ganás " + money(m.hourly) + " por hora";
+    $("salaryDetail").textContent = "≈ " + money(m.monthly) + " por mes · " + nf(m.hpw, 1) + " h por semana";
+    $("salarySummary").classList.remove("hidden");
+    $("salaryForm").classList.add("hidden");
+  }
+  function showSalaryForm() {
+    const s = state.salary;
+    if (s) {
+      $("income").value = nf(s.income, 2);
+      $("period").value = s.period;
+      $("daysWeek").value = s.daysWeek;
+      $("hoursDay").value = s.hoursDay;
+    }
+    $("salarySummary").classList.add("hidden");
+    $("salaryForm").classList.remove("hidden");
+    $("income").focus();
+  }
+
+  function readSalary() {
+    const income = parseNum($("income").value);
+    const daysWeek = Number($("daysWeek").value);
+    const hoursDay = Number(String($("hoursDay").value).replace(",", "."));
+    if (!income || income <= 0) return { error: "Poné cuánto cobrás para poder calcular." };
+    if (!daysWeek || daysWeek < 1 || daysWeek > 7) return { error: "Los días por semana tienen que estar entre 1 y 7." };
+    if (!hoursDay || hoursDay <= 0 || hoursDay > 24) return { error: "Las horas por día tienen que estar entre 1 y 24." };
+    return { income, period: $("period").value, daysWeek, hoursDay };
+  }
+
+  function saveSalary() {
+    const s = readSalary();
+    if (s.error) { $("salaryError").textContent = s.error; return false; }
+    $("salaryError").textContent = "";
+    state.salary = s;
+    save(state);
+    showSalarySummary();
+    renderHistory();
+    renderWishes();
+    if (last) calculate(last.name, last.price, false);
+    return true;
+  }
+
+  // ======== Cálculo ========
+  function compute(price) {
+    const m = salaryMath(state.salary);
+    const totalHours = price / m.hourly;
+    const jornadas = totalHours / m.hpd;
+    const weeks = totalHours / m.hpw;
+    const months = weeks / WEEKS_PER_MONTH;
+    const percent = (price / m.monthly) * 100;
+
+    let big, unit;
+    if (totalHours < 1) {
+      const mins = Math.max(1, Math.round(totalHours * 60));
+      big = nf(mins); unit = plural(mins, "minuto de laburo", "minutos de laburo");
+    } else if (jornadas < 1) {
+      const h = Math.round(totalHours * 10) / 10;
+      big = nf(h, 1); unit = plural(h, "hora de laburo", "horas de laburo");
+    } else if (months < 2) {
+      const d = jornadas >= 10 ? Math.round(jornadas) : Math.round(jornadas * 10) / 10;
+      big = nf(d, 1); unit = plural(d, "día de laburo", "días de laburo");
+    } else if (months < 24) {
+      const mo = Math.round(months * 10) / 10;
+      big = nf(mo, 1); unit = "meses de laburo";
+    } else {
+      const y = Math.round((months / 12) * 10) / 10;
+      big = nf(y, 1); unit = plural(y, "año de laburo", "años de laburo");
+    }
+
+    let quip;
+    if (totalHours < 0.25) quip = "Ni cosquillas";
+    else if (totalHours < 1) quip = "Ni duele";
+    else if (jornadas < 1) quip = "Duele poquito";
+    else if (jornadas <= 5) quip = "Duele una semanita";
+    else if (months < 1) quip = "Ya duele en serio";
+    else if (months < 6) quip = "Pensalo dos veces";
+    else if (months < 12) quip = "Duele medio año";
+    else if (months < 60) quip = "Esto es un proyecto de vida";
+    else quip = "Vas a necesitar otra vida";
+
+    // Desglose: días, horas y minutos
+    const fullDays = Math.floor(totalHours / m.hpd + 1e-9);
+    let rem = totalHours - fullDays * m.hpd;
+    let hrs = Math.floor(rem + 1e-9);
+    let mins = Math.round((rem - hrs) * 60);
+    if (mins === 60) { hrs += 1; mins = 0; }
+    const partsTxt = [];
+    if (fullDays) partsTxt.push("<b>" + nf(fullDays) + "</b> " + plural(fullDays, "día", "días"));
+    if (hrs) partsTxt.push("<b>" + nf(hrs) + "</b> " + plural(hrs, "hora", "horas"));
+    if (mins || !partsTxt.length) partsTxt.push("<b>" + nf(Math.max(mins, totalHours > 0 ? 1 : 0)) + "</b> " + plural(mins, "minuto", "minutos"));
+    const breakdown = (partsTxt.length > 1 ? partsTxt.slice(0, -1).join(", ") + " y " + partsTxt.slice(-1) : partsTxt[0]) + " de trabajo, contando jornadas de " + nf(m.hpd, 1) + " horas.";
+
+    // Grilla: elegimos la unidad para que entre
+    let gUnit, gCount;
+    if (jornadas <= 60) { gUnit = "1 día de laburo"; gCount = jornadas; }
+    else if (weeks <= 60) { gUnit = "1 semana de laburo"; gCount = weeks; }
+    else if (months <= 120) { gUnit = "1 mes de laburo"; gCount = months; }
+    else { gUnit = "1 año de laburo"; gCount = months / 12; }
+
+    return { totalHours, jornadas, weeks, months, percent, big, unit, quip, breakdown, gUnit, gCount };
+  }
+
+  function calculate(name, price, animate = true) {
+    const r = compute(price);
+    last = { name, price, r };
+
+    $("rName").textContent = name;
+    $("rPrice").textContent = money(price);
+    $("rBig").textContent = r.big;
+    $("rUnit").textContent = r.unit;
+    $("rQuip").textContent = r.quip;
+    $("rBreakdown").innerHTML = r.breakdown;
+    $("fPercent").textContent = nf(r.percent, r.percent < 10 ? 1 : 0) + "%";
+    $("fHours").textContent = nf(r.totalHours, r.totalHours < 10 ? 1 : 0);
+    $("fWeeks").textContent = nf(r.weeks, r.weeks < 10 ? 1 : 0);
+    $("gridLabel").textContent = "Cada cuadradito es " + r.gUnit + ".";
+
+    const grid = $("daysGrid");
+    grid.innerHTML = "";
+    grid.classList.remove("animate");
+    const MAX = 120;
+    const count = Math.min(Math.ceil(r.gCount), MAX);
+    const fills = [];
+    for (let i = 0; i < count; i++) {
+      const d = document.createElement("div");
+      d.className = "day";
+      const fill = document.createElement("i");
+      d.appendChild(fill);
+      grid.appendChild(d);
+      const f = Math.min(1, Math.max(0, r.gCount - i));
+      fills.push([fill, f]);
+    }
+    const note = $("gridNote");
+    if (Math.ceil(r.gCount) > MAX) {
+      note.textContent = "Y siguen " + nf(Math.ceil(r.gCount) - MAX) + " cuadraditos más que no entran en pantalla.";
+      note.classList.remove("hidden");
+    } else note.classList.add("hidden");
+
+    $("emptyState").classList.add("hidden");
+    $("result").classList.remove("hidden");
+    renderSaving();
+    renderCuotas();
+
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (animate && !reduce) {
+      grid.classList.add("animate");
+      fills.forEach(([el, f], i) => {
+        el.style.transitionDelay = Math.min(i * 18, 900) + "ms";
+      });
+      requestAnimationFrame(() => requestAnimationFrame(() => fills.forEach(([el, f]) => el.style.width = (f * 100) + "%")));
+    } else {
+      fills.forEach(([el, f]) => el.style.width = (f * 100) + "%");
+    }
+
+    if (animate && window.innerWidth < 880) {
+      $("resultCol").scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+    }
+  }
+
+  function onCalc() {
+    const err = $("productError");
+    if (!state.salary) {
+      if (!$("salaryForm").classList.contains("hidden")) {
+        if (!saveSalary()) { err.textContent = "Primero completá tu sueldo arriba."; return; }
+      }
+    }
+    const name = $("pName").value.trim() || "Esto";
+    const price = parseNum($("pPrice").value);
+    if (!price || price <= 0) { err.textContent = "Poné el precio para poder calcular."; $("pPrice").focus(); return; }
+    err.textContent = "";
+    $("cCount").value = ""; $("cValue").value = "";
+    calculate(name, price, true);
+    addHistory(name, price);
+  }
+
+  // ======== Historial ========
+  function addHistory(name, price) {
+    state.history = state.history.filter(h => !(h.name === name && h.price === price));
+    state.history.unshift({ name, price, t: Date.now() });
+    state.history = state.history.slice(0, 20);
+    save(state);
+    renderHistory();
+  }
+  function renderHistory() {
+    const list = $("historyList");
+    list.innerHTML = "";
+    if (!state.history.length || !state.salary) { $("historyPanel").classList.add("hidden"); return; }
+    $("historyPanel").classList.remove("hidden");
+    state.history.forEach((h, idx) => {
+      const r = compute(h.price);
+      const li = document.createElement("li");
+      const b = document.createElement("button");
+      b.className = "h-name"; b.type = "button";
+      b.textContent = h.name;
+      const sm = document.createElement("small"); sm.textContent = money(h.price);
+      b.appendChild(sm);
+      b.addEventListener("click", () => {
+        $("pName").value = h.name;
+        $("pPrice").value = nf(h.price, 2);
+        calculate(h.name, h.price, true);
+      });
+      const t = document.createElement("span");
+      t.className = "h-time"; t.textContent = r.big + " " + r.unit.replace(" de laburo", "");
+      const del = document.createElement("button");
+      del.className = "h-del"; del.type = "button"; del.textContent = "×";
+      del.setAttribute("aria-label", "Borrar " + h.name);
+      del.addEventListener("click", () => { state.history.splice(idx, 1); save(state); renderHistory(); });
+      li.append(b, t, del);
+      list.appendChild(li);
+    });
+  }
+
+  // ======== Ahorro ========
+  function durationText(days) {
+    if (days < 14) return nf(days) + " " + plural(days, "día", "días");
+    const weeks = days / 7;
+    if (days < 60) return "unas " + nf(Math.round(weeks)) + " semanas";
+    const months = days / 30.44;
+    if (months < 24) return "unos " + nf(Math.round(months)) + " meses";
+    return "unos " + nf(Math.round(months / 12 * 10) / 10, 1) + " años";
+  }
+  function renderSaving() {
+    const out = $("saveResult");
+    const daily = parseNum($("dailySave").value);
+    state.dailySave = daily > 0 ? daily : 0;
+    save(state);
+    if (!last || !daily || daily <= 0) { out.innerHTML = ""; return; }
+    const days = Math.ceil(last.price / daily);
+    let html = "";
+    if (days <= 1) {
+      html += '<p class="save-main">Con lo que ahorrás en un día ya te alcanza.</p>';
+    } else {
+      html += '<p class="save-main">Lo tenés en<b>' + durationText(days) + '</b></p>';
+      if (days >= 14) html += '<p class="save-sub">Son ' + nf(days) + ' días guardando ' + money(daily) + '.</p>';
+      if (days <= 365 * 60) {
+        const d = new Date(); d.setDate(d.getDate() + days);
+        const opts = days > 365 ? { month: "long", year: "numeric" } : { day: "numeric", month: "long", year: "numeric" };
+        html += '<p class="save-sub">Si empezás hoy, llegás más o menos ' + (days > 365 ? "en " : "el ") + d.toLocaleDateString("es-AR", opts) + '.</p>';
+      } else {
+        html += '<p class="save-sub">A ese ritmo no te alcanza una vida. Probá con un monto más alto.</p>';
+      }
+    }
+    if (state.salary) {
+      const m = salaryMath(state.salary);
+      const pctDay = daily / (m.hourly * m.hpd) * 100;
+      if (pctDay > 100) html += '<p class="save-sub">Ojo: eso es más de lo que ganás en un día de trabajo.</p>';
+      else html += '<p class="save-sub">Guardar ' + money(daily) + ' por día es el ' + nf(pctDay, pctDay < 10 ? 1 : 0) + '% de lo que ganás en una jornada.</p>';
+    }
+    out.innerHTML = html;
+  }
+
+  // ======== Cuotas o contado ========
+  function renderCuotas() {
+    const out = $("cResult");
+    const n = Math.floor(Number($("cCount").value));
+    const cuota = parseNum($("cValue").value);
+    const inflRaw = $("cInfl").value.trim();
+    const infl = inflRaw ? Number(inflRaw.replace(",", ".")) : NaN;
+    state.inflation = inflRaw;
+    save(state);
+    if (!last || !n || n < 2 || !cuota || cuota <= 0) { out.innerHTML = ""; return; }
+
+    const contado = last.price;
+    const total = n * cuota;
+    const recargo = (total / contado - 1) * 100;
+    let html = '<p class="save-sub">En cuotas pagás <b>' + money(total) + '</b> en total';
+    if (Math.abs(recargo) < 0.5) html += ', lo mismo que de contado.</p>';
+    else if (recargo > 0) html += ', un ' + nf(recargo, recargo < 10 ? 1 : 0) + '% más que de contado.</p>';
+    else html += ', un ' + nf(-recargo, -recargo < 10 ? 1 : 0) + '% menos que de contado.</p>';
+
+    if (state.salary) {
+      const m = salaryMath(state.salary);
+      const h = cuota / m.hourly;
+      html += '<p class="save-sub">Cada cuota te cuesta ' + (h < 1 ? nf(Math.max(1, Math.round(h * 60))) + ' minutos' : nf(h, h < 10 ? 1 : 0) + ' horas') + ' de laburo, durante ' + nf(n) + ' meses.</p>';
+    }
+
+    if (isNaN(infl) || infl < 0 || infl > 100) {
+      html += '<p class="save-sub">Poné la inflación mensual estimada para saber cuál conviene.</p>';
+      out.innerHTML = html; return;
+    }
+    // Valor de hoy de las cuotas: la primera se paga en un mes
+    const i = infl / 100;
+    let pv = 0;
+    for (let k = 1; k <= n; k++) pv += cuota / Math.pow(1 + i, k);
+    const diff = contado - pv;
+    const rel = diff / contado;
+    let verdict, cls = "";
+    if (Math.abs(rel) < 0.01) verdict = "Da casi lo mismo";
+    else if (diff > 0) verdict = "Conviene en cuotas";
+    else { verdict = "Conviene de contado"; cls = " warn"; }
+    let detail = 'Con una inflación del ' + nf(infl, 2) + '% mensual, esas cuotas valen hoy unos <b>' + money(pv) + '</b>. ';
+    if (Math.abs(rel) < 0.01) detail += 'La diferencia es mínima: elegí lo que te resulte más cómodo.';
+    else if (diff > 0) detail += 'Pagando en cuotas te ahorrás cerca de ' + money(diff) + ' en plata de hoy, siempre que tu sueldo acompañe la inflación.';
+    else detail += 'Pagar en cuotas te sale cerca de ' + money(-diff) + ' más caro en plata de hoy.';
+    html = '<span class="verdict' + cls + '">' + verdict + '</span>' + html + '<p class="save-sub">' + detail + '</p>';
+    out.innerHTML = html;
+  }
+
+  // ======== Lista de deseos ========
+  function flash(id, msg) {
+    const el = $(id); el.textContent = msg;
+    clearTimeout(el._t); el._t = setTimeout(() => { el.textContent = ""; }, 4000);
+  }
+  function addWish() {
+    if (!last) return;
+    if (state.wishlist.some(w => w.name === last.name && w.price === last.price)) {
+      flash("toast", "Ya está en tu lista de deseos.");
+      return;
+    }
+    state.wishlist.unshift({ id: Date.now().toString(36), name: last.name, price: last.price, saved: 0, t: Date.now() });
+    save(state);
+    renderWishes();
+    flash("toast", "Agregado a tu lista de deseos (está más abajo).");
+  }
+  const lastMsg = {};
+  const editing = {};
+  function renderWishes() {
+    const list = $("wishList");
+    list.innerHTML = "";
+    if (!state.wishlist.length) { $("wishPanel").classList.add("hidden"); return; }
+    $("wishPanel").classList.remove("hidden");
+    const daily = state.dailySave > 0 ? state.dailySave : 0;
+    const sorted = state.wishlist.slice().sort((a, b) => (a.saved >= a.price) - (b.saved >= b.price));
+    sorted.forEach(w => {
+      const done = w.saved >= w.price;
+      const pct = Math.min(100, (w.saved / w.price) * 100);
+      const missing = Math.max(0, w.price - w.saved);
+      const li = document.createElement("li");
+      li.className = "wish" + (done ? " done" : "");
+
+      const head = document.createElement("div"); head.className = "wish-head";
+      const title = document.createElement("div");
+      const st = document.createElement("strong"); st.textContent = w.name;
+      title.appendChild(st);
+      if (editing[w.id]) {
+        const ed = document.createElement("div"); ed.className = "price-edit";
+        const mw = document.createElement("div"); mw.className = "money";
+        const sg = document.createElement("span"); sg.textContent = "$";
+        const pin = document.createElement("input");
+        pin.type = "text"; pin.inputMode = "decimal"; pin.autocomplete = "off";
+        pin.value = nf(w.price, 2);
+        pin.setAttribute("aria-label", "Nuevo precio de " + w.name);
+        pin.addEventListener("input", () => formatMoneyInput(pin));
+        mw.append(sg, pin);
+        const ok = document.createElement("button"); ok.type = "button"; ok.className = "btn-main"; ok.textContent = "Guardar";
+        const cancel = document.createElement("button"); cancel.type = "button"; cancel.className = "btn-ghost"; cancel.textContent = "Cancelar";
+        ok.addEventListener("click", () => {
+          const np = parseNum(pin.value);
+          if (!np || np <= 0) { pin.focus(); return; }
+          const item = state.wishlist.find(x => x.id === w.id);
+          if (!item.origPrice) item.origPrice = item.price;
+          const old = item.price;
+          item.price = np;
+          save(state);
+          const ch = (np / old - 1) * 100;
+          lastMsg[w.id] = "Precio actualizado: " + (Math.abs(ch) < 0.5 ? "quedó igual." : (ch > 0 ? "subió " : "bajó ") + nf(Math.abs(ch), Math.abs(ch) < 10 ? 1 : 0) + "%.");
+          delete editing[w.id];
+          renderWishes();
+        });
+        cancel.addEventListener("click", () => { delete editing[w.id]; renderWishes(); });
+        pin.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); ok.click(); } if (e.key === "Escape") cancel.click(); });
+        ed.append(mw, ok, cancel);
+        title.appendChild(ed);
+        setTimeout(() => pin.focus(), 0);
+      } else {
+        const sm = document.createElement("small"); sm.textContent = money(w.price);
+        const eb = document.createElement("button"); eb.type = "button"; eb.className = "btn-link edit-link"; eb.textContent = "Editar precio";
+        eb.addEventListener("click", () => { editing[w.id] = true; renderWishes(); });
+        title.append(sm, eb);
+        if (w.origPrice && Math.abs(w.price / w.origPrice - 1) >= 0.005) {
+          const ch = (w.price / w.origPrice - 1) * 100;
+          const pc = document.createElement("span"); pc.className = "price-change";
+          pc.textContent = (ch > 0 ? "Subió " : "Bajó ") + nf(Math.abs(ch), Math.abs(ch) < 10 ? 1 : 0) + "% desde que lo anotaste (" + money(w.origPrice) + ").";
+          title.appendChild(pc);
+        }
+      }
+      const del = document.createElement("button");
+      del.className = "h-del"; del.type = "button"; del.textContent = "×";
+      del.setAttribute("aria-label", "Quitar " + w.name + " de la lista");
+      del.addEventListener("click", () => {
+        if (w.saved > 0 && !done && !confirm("¿Quitar «" + w.name + "» de tu lista? Se pierde lo que anotaste.")) return;
+        state.wishlist = state.wishlist.filter(x => x.id !== w.id); save(state); renderWishes();
+      });
+      head.append(title, del);
+
+      const bar = document.createElement("div"); bar.className = "bar";
+      bar.setAttribute("role", "progressbar"); bar.setAttribute("aria-valuemin", "0"); bar.setAttribute("aria-valuemax", "100");
+      bar.setAttribute("aria-valuenow", String(Math.round(pct)));
+      const fill = document.createElement("i"); fill.style.width = pct + "%"; bar.appendChild(fill);
+
+      const status = document.createElement("p"); status.className = "wish-status";
+      status.innerHTML = "Llevás <b>" + money(w.saved) + "</b> de " + money(w.price) + " (" + nf(pct, pct < 10 ? 1 : 0) + "%).";
+      li.append(head, bar, status);
+
+      if (done) {
+        const stamp = document.createElement("span"); stamp.className = "done-stamp"; stamp.textContent = "¡Lo juntaste!";
+        li.appendChild(stamp);
+      } else {
+        const eta = document.createElement("p"); eta.className = "wish-eta";
+        const bits = ["Te faltan " + money(missing)];
+        if (state.salary) {
+          const m = salaryMath(state.salary);
+          const h = missing / m.hourly;
+          bits.push(h < 1 ? "unos " + nf(Math.max(1, Math.round(h * 60))) + " minutos de laburo" : "unas " + nf(h, h < 10 ? 1 : 0) + " horas de laburo");
+        }
+        if (daily) bits.push("guardando " + money(daily) + " por día, lo tenés en " + durationText(Math.ceil(missing / daily)));
+        eta.textContent = bits.join(" · ") + ".";
+        li.appendChild(eta);
+      }
+
+      const add = document.createElement("div"); add.className = "wish-add";
+      const mwrap = document.createElement("div"); mwrap.className = "money";
+      const sign = document.createElement("span"); sign.textContent = "$";
+      const inp = document.createElement("input");
+      inp.type = "text"; inp.inputMode = "decimal"; inp.autocomplete = "off"; inp.placeholder = "Monto";
+      inp.setAttribute("aria-label", "Monto para " + w.name);
+      inp.addEventListener("input", () => formatMoneyInput(inp));
+      mwrap.append(sign, inp);
+      const apply = (dir) => {
+        const v = parseNum(inp.value);
+        if (!v || v <= 0) { msg.textContent = "Escribí un monto primero."; inp.focus(); return; }
+        const item = state.wishlist.find(x => x.id === w.id);
+        if (dir < 0 && v > item.saved) {
+          msg.textContent = "No podés sacar " + money(v) + ": para esto llevás " + money(item.saved) + ".";
+          return;
+        }
+        item.saved = Math.round((item.saved + dir * v) * 100) / 100;
+        save(state);
+        lastMsg[w.id] = (dir > 0 ? "Sumaste " : "Sacaste ") + money(v) + ".";
+        renderWishes();
+      };
+      const plus = document.createElement("button"); plus.type = "button"; plus.className = "btn-main"; plus.textContent = "+ Sumar";
+      plus.addEventListener("click", () => apply(1));
+      const minus = document.createElement("button"); minus.type = "button"; minus.className = "btn-ghost"; minus.textContent = "− Sacar";
+      minus.addEventListener("click", () => apply(-1));
+      inp.addEventListener("keydown", e => { if (e.key === "Enter") { e.preventDefault(); inp.blur(); } });
+      add.append(mwrap, plus, minus);
+      const msg = document.createElement("p"); msg.className = "wish-msg"; msg.setAttribute("role", "status");
+      msg.textContent = lastMsg[w.id] || "";
+      li.append(add, msg);
+
+      list.appendChild(li);
+    });
+  }
+
+  // ======== Recomendar ========
+  function appUrl() {
+    if (SITE_URL) return SITE_URL.startsWith("http") ? SITE_URL : "https://" + SITE_URL;
+    return location.origin + location.pathname;
+  }
+  async function recommend() {
+    const text = "Mirá esta app para ver cuántas horas de trabajo te cuesta lo que querés comprar.";
+    const url = appUrl();
+    if (navigator.share) {
+      try { await navigator.share({ title: APP_NAME, text, url }); return; }
+      catch (e) { if (e && e.name === "AbortError") return; }
+    }
+    const full = text + " " + url;
+    try { await navigator.clipboard.writeText(full); flash("footToast", "Link copiado. Pegalo donde quieras."); }
+    catch (e) {
+      const ta = document.createElement("textarea"); ta.value = full; document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); flash("footToast", "Link copiado. Pegalo donde quieras."); }
+      catch (e2) { flash("footToast", "Copiá este link: " + url); }
+      ta.remove();
+    }
+  }
+
+  // ======== Eventos ========
+  ["income", "pPrice", "dailySave"].forEach(id => $(id).addEventListener("input", e => formatMoneyInput(e.target)));
+  $("saveSalary").addEventListener("click", saveSalary);
+  $("editSalary").addEventListener("click", showSalaryForm);
+  $("calc").addEventListener("click", onCalc);
+  $("pPrice").addEventListener("keydown", e => { if (e.key === "Enter") onCalc(); });
+  $("pName").addEventListener("keydown", e => { if (e.key === "Enter") $("pPrice").focus(); });
+  ["income", "daysWeek", "hoursDay"].forEach(id => $(id).addEventListener("keydown", e => { if (e.key === "Enter") saveSalary(); }));
+  document.querySelectorAll(".chip").forEach(ch => ch.addEventListener("click", () => {
+    $("pName").value = ch.dataset.name;
+    $("pPrice").focus();
+  }));
+  $("clearHistory").addEventListener("click", () => { state.history = []; save(state); renderHistory(); });
+  $("dailySave").addEventListener("input", () => { renderSaving(); renderWishes(); });
+  $("addWish").addEventListener("click", addWish);
+  $("cValue").addEventListener("input", e => { formatMoneyInput(e.target); renderCuotas(); });
+  ["cCount", "cInfl"].forEach(id => $(id).addEventListener("input", renderCuotas));
+  $("cNoInterest").addEventListener("click", () => {
+    const n = Math.floor(Number($("cCount").value));
+    if (!last) return;
+    if (!n || n < 2) { $("cCount").focus(); $("cResult").innerHTML = '<p class="save-sub">Primero poné la cantidad de cuotas.</p>'; return; }
+    $("cValue").value = nf(Math.round(last.price / n * 100) / 100, 2);
+    renderCuotas();
+  });
+  $("recommend").addEventListener("click", recommend);
+
+  // ======== Inicio ========
+  if (state.salary) showSalarySummary();
+  renderHistory();
+
+  if (state.dailySave > 0) $("dailySave").value = nf(state.dailySave, 2);
+  if (state.inflation) $("cInfl").value = state.inflation;
+  renderWishes();
+})();
+</script>
+</body>
+</html>
