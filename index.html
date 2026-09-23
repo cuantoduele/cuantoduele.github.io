@@ -437,7 +437,7 @@
       <span>Se comparte solo el link, nunca tus datos.</span>
     </div>
     <p class="toast" id="footToast" role="status"></p>
-    <p>Tus datos no salen de tu dispositivo: no hay registro, ni cuentas, ni servidores.</p>
+    <p>Tus datos no salen de tu dispositivo: no hay registro ni cuentas. Solo contamos visitas de forma anónima.</p>
     <p>Los cálculos son aproximados y usan 4,33 semanas por mes.</p>
   </footer>
 </div>
@@ -447,9 +447,21 @@
 (function () {
   // ======== CONFIGURACIÓN ========
     const APP_NAME = "¿Cuánto duele?";
-  const SITE_URL = ""; // Cuando la subas a internet, poné acá tu dirección. Ej: "cuantoduele.netlify.app"
+  const SITE_URL = "cuantoduele.github.io"; // Cuando la subas a internet, poné acá tu dirección. Ej: "cuantoduele.netlify.app"
   const WEEKS_PER_MONTH = 52 / 12;
   const STORE_KEY = "cuantoduele:v1";
+
+  // ======== Estadísticas anónimas (GoatCounter) ========
+  // Solo se envía el nombre de la acción (ej: "calculo"), nunca montos ni datos personales.
+  function track(name) {
+    try {
+      if (window.goatcounter && typeof window.goatcounter.count === "function") {
+        window.goatcounter.count({ path: "accion-" + name, title: name, event: true });
+      }
+    } catch (e) {}
+  }
+  const tracked = new Set(); // para contar algunas acciones una sola vez por producto calculado
+  function trackOnce(name) { if (!tracked.has(name)) { tracked.add(name); track(name); } }
 
   // ======== Utilidades ========
   const $ = (id) => document.getElementById(id);
@@ -530,6 +542,7 @@
     $("salaryError").textContent = "";
     state.salary = s;
     save(state);
+    track("sueldo-guardado");
     showSalarySummary();
     renderHistory();
     renderWishes();
@@ -600,6 +613,7 @@
   function calculate(name, price, animate = true) {
     const r = compute(price);
     last = { name, price, r };
+    tracked.clear();
 
     $("rName").textContent = name;
     $("rPrice").textContent = money(price);
@@ -668,6 +682,7 @@
     $("cCount").value = ""; $("cValue").value = "";
     calculate(name, price, true);
     addHistory(name, price);
+    track("calculo");
   }
 
   // ======== Historial ========
@@ -755,7 +770,7 @@
     const infl = inflRaw ? Number(inflRaw.replace(",", ".")) : NaN;
     state.inflation = inflRaw;
     save(state);
-    if (!last || !n || n < 2 || !cuota || cuota <= 0) { out.innerHTML = ""; return; }
+    if (!last || !n || n < 2 || !cuota || cuota <= 0) { out.innerHTML = ""; return false; }
 
     const contado = last.price;
     const total = n * cuota;
@@ -773,7 +788,7 @@
 
     if (isNaN(infl) || infl < 0 || infl > 100) {
       html += '<p class="save-sub">Poné la inflación mensual estimada para saber cuál conviene.</p>';
-      out.innerHTML = html; return;
+      out.innerHTML = html; return false;
     }
     // Valor de hoy de las cuotas: la primera se paga en un mes
     const i = infl / 100;
@@ -791,6 +806,7 @@
     else detail += 'Pagar en cuotas te sale cerca de ' + money(-diff) + ' más caro en plata de hoy.';
     html = '<span class="verdict' + cls + '">' + verdict + '</span>' + html + '<p class="save-sub">' + detail + '</p>';
     out.innerHTML = html;
+    return true;
   }
 
   // ======== Lista de deseos ========
@@ -807,6 +823,7 @@
     state.wishlist.unshift({ id: Date.now().toString(36), name: last.name, price: last.price, saved: 0, t: Date.now() });
     save(state);
     renderWishes();
+    track("deseo-agregado");
     flash("toast", "Agregado a tu lista de deseos (está más abajo).");
   }
   const lastMsg = {};
@@ -849,6 +866,7 @@
           const old = item.price;
           item.price = np;
           save(state);
+          track("precio-editado");
           const ch = (np / old - 1) * 100;
           lastMsg[w.id] = "Precio actualizado: " + (Math.abs(ch) < 0.5 ? "quedó igual." : (ch > 0 ? "subió " : "bajó ") + nf(Math.abs(ch), Math.abs(ch) < 10 ? 1 : 0) + "%.");
           delete editing[w.id];
@@ -921,8 +939,11 @@
           msg.textContent = "No podés sacar " + money(v) + ": para esto llevás " + money(item.saved) + ".";
           return;
         }
+        const wasDone = item.saved >= item.price;
         item.saved = Math.round((item.saved + dir * v) * 100) / 100;
         save(state);
+        track(dir > 0 ? "deseo-ahorro-sumado" : "deseo-ahorro-sacado");
+        if (!wasDone && item.saved >= item.price) track("deseo-completado");
         lastMsg[w.id] = (dir > 0 ? "Sumaste " : "Sacaste ") + money(v) + ".";
         renderWishes();
       };
@@ -946,6 +967,7 @@
     return location.origin + location.pathname;
   }
   async function recommend() {
+    track("recomendar");
     const text = "Mirá esta app para ver cuántas horas de trabajo te cuesta lo que querés comprar.";
     const url = appUrl();
     if (navigator.share) {
@@ -975,16 +997,19 @@
     $("pPrice").focus();
   }));
   $("clearHistory").addEventListener("click", () => { state.history = []; save(state); renderHistory(); });
-  $("dailySave").addEventListener("input", () => { renderSaving(); renderWishes(); });
+  $("dailySave").addEventListener("input", () => {
+    renderSaving(); renderWishes();
+    if (last && parseNum($("dailySave").value) > 0) trackOnce("ahorro-diario");
+  });
   $("addWish").addEventListener("click", addWish);
-  $("cValue").addEventListener("input", e => { formatMoneyInput(e.target); renderCuotas(); });
-  ["cCount", "cInfl"].forEach(id => $(id).addEventListener("input", renderCuotas));
+  $("cValue").addEventListener("input", e => { formatMoneyInput(e.target); if (renderCuotas()) trackOnce("cuotas-comparadas"); });
+  ["cCount", "cInfl"].forEach(id => $(id).addEventListener("input", () => { if (renderCuotas()) trackOnce("cuotas-comparadas"); }));
   $("cNoInterest").addEventListener("click", () => {
     const n = Math.floor(Number($("cCount").value));
     if (!last) return;
     if (!n || n < 2) { $("cCount").focus(); $("cResult").innerHTML = '<p class="save-sub">Primero poné la cantidad de cuotas.</p>'; return; }
     $("cValue").value = nf(Math.round(last.price / n * 100) / 100, 2);
-    renderCuotas();
+    if (renderCuotas()) trackOnce("cuotas-comparadas");
   });
   $("recommend").addEventListener("click", recommend);
 
@@ -997,5 +1022,7 @@
   renderWishes();
 })();
 </script>
+<!-- Estadísticas anónimas de visitas (GoatCounter): sin cookies ni datos personales -->
+<script data-goatcounter="https://cuantoduele.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
 </body>
 </html>
